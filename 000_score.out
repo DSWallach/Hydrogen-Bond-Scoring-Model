@@ -1,4 +1,4 @@
 Residue:    A Lys 120    B Lys 120      Ser 241      Ala 276      Cys 277    A Arg 280    B Arg 280      Arg 283      Arg 273
- Lengths       2.6389       2.6389       2.6389       2.6389       2.6389       3.2761       3.1433       2.7746       2.7444
- Scores        7.6087       7.6087       7.6087       7.6087       7.6087      13.7931      20.6897      21.6867      15.6627
-The sum of the scores of all the bonds is   109.8756
+ Lengths       2.6389       2.7987       3.2761       3.0874       3.1433       2.9436       2.7746       3.1717       2.7444
+  Scores       7.6087      21.6867      13.7931      25.0000      20.6897      25.0000      21.6867      20.6897      15.6627
+The sum of the scores of all the bonds is   171.8173

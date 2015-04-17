@@ -5,11 +5,9 @@ c     to produce the score this program requires the dist.dat file
 c     produced by running cpptraj_dist on the desired DNA sequence
 c     04.08.15 David Selwyn Wallach, Kelly M. Thayer
 
-      
-      integer until             ! Used to create a repear-until loop
-      integer max               ! Also used for looping
-      integer until2            !
-      integer max2              !
+      integer BM                !
+      integer BL                !
+      integer BK                !
       integer ID(9)             ! Bond input identites, Integer form
       real length(9)            ! readin sequence
       character*8 resid         ! string "Residue "
@@ -83,7 +81,7 @@ c.....Initialization of bond(9)
       resid= "Residue:"
 
 c.....Intialization of length(9), necessary for when the input file
-c      has fewer than nine bonds 
+c     has fewer than nine bonds 
  95   length(1)=0
       length(2)=0
       length(3)=0
@@ -94,7 +92,7 @@ c      has fewer than nine bonds
       length(8)=0
       length(9)=0
 
-c.....Initializing iden(9) and others
+c.....Initializing iden(9) and integers for fixing missing bonds
  94   iden(1)="9"
       iden(2)="9"
       iden(3)="9"
@@ -104,10 +102,9 @@ c.....Initializing iden(9) and others
       iden(7)="9"
       iden(8)="9"
       iden(9)="9"
-      until=1
-      max=9
-      until2=1
-      max2=9
+      BK=1
+      BM=1
+      BL=0
 
       print*, "Welcome to bondScore!"      
       print*, "Please input file name (xxx_dist.dat)"
@@ -120,70 +117,78 @@ c.....Source input
      1     iden(6),iden(7),iden(8),iden(9)
       read(19,501)in,length(1),length(2),length(3),
      1     length(4),length(5),length(6),length(7),length(8),length(9)
-      
+
+      DO 56 i=1,9
+         print*,iden(i),"#"
+         print*,length(i),"*"
+ 56   CONTINUE
 c.....Converting character inden(9) to integer ID(9)
-      print*,"Working before convert"
  150  CONTINUE
-      read(iden(until),*)ID(until)
-      until=until+1
-      if((ID(until)==until-1).AND.until.LT.9)then
+      read(iden(BK),*)ID(BK)
+      print*,iden(BK),ID(BK)
+      if((ID(BK)==BK-1).AND.BK.LT.9)then
+         BK=BK+1
          goto 150
-      elseif(until.LT.9)then
-         until2=until
+      elseif(BM.LT.9)then
+         BM=BK
+         BL=9-BK
          goto 152
       else 
          goto 160
       endif
 
 c.....Fixing missing input
- 152  DO WHILE(.NOT.(10 - until2==1+ID(10 - until2))) 
-         iden(10 - until2)=iden((10 - until2) - 1)
-         length(10 - until2)=length((10 - until2) - 1)
-         ID(10 - until2)=ID((10 - until2) - 1)
-         until2=until2+1
-      END DO
-      goto 150
+ 152  CONTINUE
+      DO 55 i=1,9
+         print*,length(i)
+ 55      CONTINUE
+      print*
+         if (BL.LT.1)then
+            print*,"Setting ",iden(BM+BL), " Equal to zero"
+            iden(BM+BL)=knownID(BM+BL)
+            length(BM+BL)=0.0000
+            goto 160
+         else
+            print*,"Running input fixer on ",iden(BM+BL)
+            print*,iden(BM+BL)," set to ",iden(BM+BL-1)
+            iden(BM+BL)=iden(BM+BL-1)
+            print*,length(BM+BL)," set to ",length(BM+BL-1)
+            length(BM+BL)=length(BM+BL-1)
+            BL=BL-1
+            goto 152
+         endif
       
  160  CONTINUE
 c.....do loop for binning each length
       print*,"Working before DO loop"
       DO 50, i = 1, 9
-         print*, "working before first if",ID(i),i
-         if (.NOT.(ID(i+1)==9.AND.8==i))then
-            print*, "Working after first if"
-            if (length(i).LT.bin1)then
-               score(i)=bin1score
-            elseif(length(i).LT.bin2)then
-               score(i)=bin2score
-            elseif(length(i).LT.bin3)then
-               score(i)=bin3score
-            elseif(length(i).LT.bin4)then
-               score(i)=bin4score
-            elseif(length(i).LT.bin5)then
-               score(i)=bin5score
-            elseif(length(i).LT.bin6)then
-               score(i)=bin6score
-            elseif(length(i).LT.bin7)then 
-               score(i)=bin7score
-            elseif(length(i).LT.bin8)then
-               score(i)=bin8score
-            elseif(length(i).LT.bin9)then
-               score(i)=bin9score
-            else
-               score(i)=0
-               print*, "At", bond(i),"Length is outside of bin range"
-            endif
-         else
-            print*, "Working after first else"
+         print*,"Working at bond ",BK,iden(i),length(i)
+         if (length(i)==0)then
             score(i)=0
-            print*, "At", bond(i),"No hydrogen bond was formed"
-c     goto 93
+            print*, "At", iden(i),"Length is outside of bin range"
+         elseif(length(i).LT.bin1)then
+            score(i)=bin1score
+         elseif(length(i).LT.bin2)then
+            score(i)=bin2score
+         elseif(length(i).LT.bin3)then
+            score(i)=bin3score
+         elseif(length(i).LT.bin4)then
+            score(i)=bin4score
+         elseif(length(i).LT.bin5)then
+            score(i)=bin5score
+         elseif(length(i).LT.bin6)then
+            score(i)=bin6score
+         elseif(length(i).LT.bin7)then 
+            score(i)=bin7score
+         elseif(length(i).LT.bin8)then
+            score(i)=bin8score
+         elseif(length(i).LT.bin9)then
+            score(i)=bin9score
+         else
+            score(i)=0
+            print*, "At", iden(i),"Length is outside of bin range"
          endif
  50   CONTINUE
-
-c......Incase a bond was not formed
-c     print*,"Working before convert + 1"
-c     93   read(iden(i+1),*)ID(i)
       
 c.....Sumation of scores
       print*, "Working after DO loop"
@@ -192,8 +197,8 @@ c.....Sumation of scores
       sumString="The sum of the scores of all the bonds is"
       filename=infile
       outfile=filename//"score.out"
-      lengths=" Lengths"
-      scores= " Scores "
+      lengths="Lengths:"
+      scores= " Scores:"
 
       print*, "Your output file is ", outfile      
 c.....Data output
