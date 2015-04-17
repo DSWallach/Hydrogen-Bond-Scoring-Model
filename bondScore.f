@@ -119,35 +119,35 @@ c.....Source input
      1     length(4),length(5),length(6),length(7),length(8),length(9)
 
       DO 56 i=1,9
-         print*,iden(i),"#"
-         print*,length(i),"*"
+         print*,iden(i),"#",length(i)
  56   CONTINUE
+      
 c.....Converting character inden(9) to integer ID(9)
  150  CONTINUE
       read(iden(BK),*)ID(BK)
       print*,iden(BK),ID(BK)
       if((ID(BK)==BK-1).AND.BK.LT.9)then
+         print*,"Check 1",BM,BK
          BK=BK+1
          goto 150
-      elseif(BM.LT.9)then
+      elseif(BK.LT.9)then
+         print*,"Check 2",BM,BK
          BM=BK
          BL=9-BK
          goto 152
-      else 
+      else
+         print*,"Check 3",BM,BK
          goto 160
       endif
 
 c.....Fixing missing input
  152  CONTINUE
-      DO 55 i=1,9
-         print*,length(i)
- 55      CONTINUE
-      print*
          if (BL.LT.1)then
             print*,"Setting ",iden(BM+BL), " Equal to zero"
             iden(BM+BL)=knownID(BM+BL)
             length(BM+BL)=0.0000
-            goto 160
+            BK=1+BM
+            goto 150
          else
             print*,"Running input fixer on ",iden(BM+BL)
             print*,iden(BM+BL)," set to ",iden(BM+BL-1)
@@ -160,7 +160,6 @@ c.....Fixing missing input
       
  160  CONTINUE
 c.....do loop for binning each length
-      print*,"Working before DO loop"
       DO 50, i = 1, 9
          print*,"Working at bond ",BK,iden(i),length(i)
          if (length(i)==0)then
@@ -191,16 +190,16 @@ c.....do loop for binning each length
  50   CONTINUE
       
 c.....Sumation of scores
-      print*, "Working after DO loop"
  89   sumScore=score(1)+(score(2)+(score(3)+(score(4)+(score(5)+
      1     (score(6)+(score(7)+(score(8)+score(9))))))))
+      
       sumString="The sum of the scores of all the bonds is"
       filename=infile
       outfile=filename//"score.out"
       lengths="Lengths:"
       scores= " Scores:"
-
-      print*, "Your output file is ", outfile      
+      print*, "Your output file is ", outfile
+      
 c.....Data output
       open(unit=20,file=outfile)
       write(20,500)resid,bond(1),bond(2),bond(3),bond(4),bond(5),
@@ -212,7 +211,7 @@ c.....Data output
       write(20,502),sumString,sumScore
 
  500  format(A8,9(1x,A12))
- 501  format(A8,9(6x,f7.4))
+ 501  format(A8,9(5x,f8.4))
  502  format(A43,f9.4)
  503  format(A8,9(12x,A1))
       end
